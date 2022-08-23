@@ -1,7 +1,7 @@
 import pygame
 
+from debug import debug
 from src.settings import *
-
 from src.tile import Tile
 from src.player import Player
 
@@ -27,9 +27,18 @@ class Level:
                 y = row_index * TILESIZE
 
                 if col == 'x':
-                    Tile(pos=(x,y), groups=[self.visible_sprites, self.obstacle_sprites])
+                    Tile(
+                        pos=(x,y),
+                        groups=[self.visible_sprites, self.obstacle_sprites]
+                    )
                 if col == 'p':
-                    Player(pos=(x,y), groups=[self.visible_sprites])
+                    self.player = Player(
+                        pos=(x,y),
+                        groups=[self.visible_sprites],
+                        obstacle_sprites=self.obstacle_sprites
+                    )
 
     def run(self) -> None:
         self.visible_sprites.draw(self.display_surface)
+        self.visible_sprites.update()
+        debug(self.player.direction)
