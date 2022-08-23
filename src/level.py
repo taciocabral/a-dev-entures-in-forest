@@ -6,6 +6,7 @@ from src.settings import *
 from src.tile import Tile
 from src.player import Player
 from src.support import import_csv_layout, import_folder_imgs
+from src.weapon import Weapon
 
 class Level:
     def __init__(self) -> None:
@@ -18,6 +19,9 @@ class Level:
     
         # Sprite setup
         self.create_world_map()
+
+        # Attack sptrites
+        self.current_attack = None
 
     def create_world_map(self) -> None:
         layouts = {
@@ -63,8 +67,18 @@ class Level:
         self.player = Player(
             pos=(2000,1500),
             groups=[self.visible_sprites],
-            obstacle_sprites=self.obstacle_sprites
+            obstacle_sprites=self.obstacle_sprites,
+            create_attack=self.create_attack,
+            destroy_attack=self.destroy_attack
         )
+
+    def create_attack(self):
+        self.current_attack = Weapon(self.player, [self.visible_sprites])
+    
+    def destroy_attack(self):
+        if self.current_attack:
+            self.current_attack.kill()
+        self.current_attack = None
 
     def run(self) -> None:
         self.visible_sprites.custom_draw(self.player)
