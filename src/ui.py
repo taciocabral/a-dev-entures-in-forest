@@ -31,7 +31,6 @@ class Ui:
             weapon = pygame.image.load(path).convert_alpha()
             self.magic_graphics.append(weapon)
 
-
     def show_bar(self, current, max_amount, bg_rect, color):
         # draw bg
         pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)

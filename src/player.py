@@ -1,13 +1,11 @@
-from enum import Enum
-from sre_constants import MAGIC
-from venv import create
 import pygame
 
 from src.settings import *
 from src.support import import_folder_imgs
+from src.entity import Entity
 
 
-class Player(pygame.sprite.Sprite):
+class Player(Entity):
     def __init__(
         self,
         pos,
@@ -25,15 +23,12 @@ class Player(pygame.sprite.Sprite):
         # Graphics Setup
         self.import_player_assets()
         self.status = 'down'
-        self.frame_index = 0
-        self.animation_speed = 0.15
-        self.obstacle_sprites = obstacle_sprites
 
         # Movement
-        self.direction = pygame.math.Vector2()
         self.attaking = False
         self.attack_cooldown = 400 
         self.attack_time = None
+        self.obstacle_sprites = obstacle_sprites
 
         # Weapon
         self.create_attack = create_attack
@@ -167,36 +162,6 @@ class Player(pygame.sprite.Sprite):
         else:
             if 'attack' in self.status:
                 self.status = self.status.replace('_attack', '')
-
-    def move(self, speed) -> None:
-        """Move the screen"""
-        if self.direction.magnitude() != 0: # To player not run more faster on diagonal
-            self.direction = self.direction.normalize()
-
-        self.hitbox.x += self.direction.x * speed
-        self.collision('horizontal')
-        self.hitbox.y += self.direction.y * speed
-        self.collision('vertical')
-
-        self.rect.center = self.hitbox.center 
-
-    def collision(self, direction) -> None:
-        """Generate the player hitbox to collisions"""
-        if direction == 'horizontal':
-            for sprite in self.obstacle_sprites:
-                if sprite.hitbox.colliderect(self.hitbox):
-                    if self.direction.x > 0: # moving right
-                        self.hitbox.right = sprite.hitbox.left
-                    if self.direction.x < 0: # moving left
-                        self.hitbox.left = sprite.hitbox.right
-
-        if direction == 'vertical':
-            for sprite in self.obstacle_sprites:
-                if sprite.hitbox.colliderect(self.hitbox):
-                    if self.direction.y > 0: # moving down
-                        self.hitbox.bottom = sprite.hitbox.top
-                    if self.direction.y < 0: # moving up
-                        self.hitbox.top = sprite.hitbox.bottom
 
     def cooldowns(self) -> None:
         """Check the time of attack and magic actions to cooldown the actions"""
