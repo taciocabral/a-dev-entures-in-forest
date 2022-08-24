@@ -19,15 +19,15 @@ class Level:
         self.obstacle_sprites = pygame.sprite.Group()
     
         # Sprite setup
-        self.create_world_map()
+        self.create_world()
 
-        # Attack sptrites
+        # Attack sprites
         self.current_attack = None
 
         # User Interface
         self.ui = Ui()
 
-    def create_world_map(self) -> None:
+    def create_world(self) -> None:
         layouts = {
             'boundary': import_csv_layout('./map/map_FloorBlocks.csv'),
             'grass': import_csv_layout('./map/map_Grass.csv'),
@@ -73,16 +73,20 @@ class Level:
             groups=[self.visible_sprites],
             obstacle_sprites=self.obstacle_sprites,
             create_attack=self.create_attack,
-            destroy_attack=self.destroy_attack
+            destroy_attack=self.destroy_attack,
+            create_magic=self.create_magic
         )
 
     def create_attack(self):
         self.current_attack = Weapon(self.player, [self.visible_sprites])
-    
+
     def destroy_attack(self):
         if self.current_attack:
             self.current_attack.kill()
         self.current_attack = None
+
+    def create_magic(self, style, strength, cost):
+        pass
 
     def run(self) -> None:
         self.visible_sprites.custom_draw(self.player)
