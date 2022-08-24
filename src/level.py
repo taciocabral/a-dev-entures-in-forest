@@ -6,6 +6,7 @@ from src.settings import *
 from src.tile import Tile
 from src.player import Player
 from src.support import import_csv_layout, import_folder_imgs
+from src.ui import Ui
 from src.weapon import Weapon
 
 class Level:
@@ -22,6 +23,9 @@ class Level:
 
         # Attack sptrites
         self.current_attack = None
+
+        # User Interface
+        self.ui = Ui()
 
     def create_world_map(self) -> None:
         layouts = {
@@ -83,6 +87,7 @@ class Level:
     def run(self) -> None:
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
+        self.ui.display(self.player)
 
 
 class YSortCameraGroup(pygame.sprite.Group):
