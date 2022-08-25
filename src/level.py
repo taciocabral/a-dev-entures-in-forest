@@ -6,17 +6,19 @@ from src.enemy import Enemy
 from src.particles import AnimationPlayer
 from src.player.player import Player
 from src.player.magic import MagicPlayer
-from src.settings import *
+from settings import *
 from src.support import import_csv_layout, import_folder_imgs
 from src.tile import Tile
 from src.ui import Ui
 from src.weapon import Weapon
+from src.menus.upgrade import UpgradeMenu
 
 
 class Level:
     def __init__(self) -> None:
         # Get display surface
         self.display_surface = pygame.display.get_surface()
+        self.game_paused = False
 
         # Sprite groups setup
         self.visible_sprites = YSortCameraGroup()
@@ -32,6 +34,7 @@ class Level:
 
         # User Interface
         self.ui = Ui()
+        self.upgrade_menu = UpgradeMenu(self.player)
 
         # Particles
         self.animation_player = AnimationPlayer()
@@ -100,7 +103,8 @@ class Level:
                                     groups=[self.visible_sprites, self.attackable_sprites],
                                     obstacle_sprites=self.obstacle_sprites,
                                     damage_player=self.damage_player,
-                                    trigger_death_particles=self.trigger_death_particles
+                                    trigger_death_particles=self.trigger_death_particles,
+                                    add_xp = self.add_xp
                                 )
 
     def create_attack(self):
@@ -168,13 +172,25 @@ class Level:
             groups=[self.visible_sprites]
         )
 
+    def add_xp(self, amount):
+        self.player.exp += amount
+
+    def toggle_menu(self):
+        self.game_paused = not self.game_paused
+
     def run(self) -> None:
         """Update and draw the game"""
         self.visible_sprites.custom_draw(self.player)
-        self.visible_sprites.update()
-        self.visible_sprites.enemy_update(self.player)
-        self.player_attack_logic()
         self.ui.display(self.player)
+
+        if self.game_paused:
+            self.upgrade_menu.display()
+            # display upgrade menu
+        else:
+            # run the game
+            self.visible_sprites.update()
+            self.visible_sprites.enemy_update(self.player)
+            self.player_attack_logic()
 
 
 class YSortCameraGroup(pygame.sprite.Group):

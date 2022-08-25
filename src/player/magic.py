@@ -2,7 +2,7 @@ from random import randint
 
 import pygame
 
-from src.settings import *
+from settings import *
 from src.player.player import Player
 
 class MagicPlayer:

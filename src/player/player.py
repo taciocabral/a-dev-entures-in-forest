@@ -2,7 +2,7 @@ from sre_constants import MAGIC
 from typing import Union
 import pygame
 
-from src.settings import *
+from settings import *
 from src.support import import_folder_imgs
 from src.entity import Entity
 
@@ -57,10 +57,12 @@ class Player(Entity):
             'magic': 4,
             'speed': 5,
         }
+        self.max_stats = {'health': 300, 'energy': 140, 'attack': 20, 'magic' : 10, 'speed': 10}
+        self.upgrade_cost = {'health': 100, 'energy': 100, 'attack': 100, 'magic' : 100, 'speed': 100}
         self.health = self.stats['health']
         self.energy = self.stats['energy']
+        self.exp = 5000
         self.speed = self.stats['speed']
-        self.exp = 123
 
         # Damage timer
         self.vulnerable = True
@@ -141,7 +143,7 @@ class Player(Entity):
                 self.weapon = list(WEAPON_DATA.keys())[self.weapon_index]
 
             # select magic
-            if keys[pygame.K_m] and self.can_switch_magic:
+            if keys[pygame.K_q] and self.can_switch_magic:
                 self.can_switch_magic = False
                 self.magic_switch_time = pygame.time.get_ticks()
 
@@ -222,6 +224,12 @@ class Player(Entity):
 
         return base_damage + spell_damage
 
+    def get_value_by_index(self, index: int):
+        return list(self.stats.values())[index]
+
+    def get_cost_by_index(self, index: int):
+        return list(self.upgrade_cost.values())[index]
+
     def energy_recovery(self):
         if self.energy < self.stats['energy']:
             self.energy += .01 * self.stats['magic']
@@ -233,5 +241,5 @@ class Player(Entity):
         self.cooldowns()
         self.get_status()
         self.animate()
-        self.move(self.speed)
+        self.move(self.stats['speed'])
         self.energy_recovery()

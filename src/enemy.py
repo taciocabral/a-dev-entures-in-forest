@@ -3,14 +3,23 @@ from typing import Tuple
 import pygame
 from pygame.sprite import AbstractGroup
 
-from src.settings import *
+from settings import *
 from src.support import *
 from src.entity import Entity
 from src.player.player import Player
 
 
 class Enemy(Entity):
-    def __init__(self, monster_name, position, groups: AbstractGroup, obstacle_sprites, damage_player, trigger_death_particles) -> None:
+    def __init__(
+        self,
+        monster_name,
+        position,
+        groups: AbstractGroup,
+        obstacle_sprites,
+        damage_player,
+        trigger_death_particles,
+        add_xp
+    ) -> None:
 
         # General setup
         super().__init__(groups)
@@ -44,6 +53,7 @@ class Enemy(Entity):
         self.attack_cooldown = 400
         self.damage_player = damage_player
         self.trigger_death_particles = trigger_death_particles
+        self.add_xp = add_xp
 
         # Invincibility timer
         self.vulnerable = True
@@ -146,6 +156,7 @@ class Enemy(Entity):
                 self.rect.center,
                 self.monster_name
             )
+            self.add_xp(self.exp)
 
     def hit_reaction(self) -> None:
         if not self.vulnerable:
