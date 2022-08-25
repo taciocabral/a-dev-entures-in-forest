@@ -33,4 +33,4 @@ make run
 **Leave the game:**
 - `Ctrl + c` in the terminal;
 - **MacOS:** `cmd + w`
-- **Windows:** `alt+f4`
+- **Windows:** `alt + f4`
