@@ -1,5 +1,5 @@
-from sre_constants import MAGIC
 from typing import Union
+
 import pygame
 
 from settings import *
@@ -20,7 +20,7 @@ class Player(Entity):
         super().__init__(*groups)
         self.image = pygame.image.load('./graphics/player/player.png').convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
-        self.hitbox = self.rect.inflate(0, -50 )
+        self.hitbox = self.rect.inflate(-6, HITBOX_OFFSET['player'])
 
         # Graphics Setup
         self.import_player_assets()
