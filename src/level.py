@@ -19,11 +19,13 @@ class Level:
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
     
-        # Sprite setup
-        self.create_world()
-
         # Attack sprites
         self.current_attack = None
+        self.attack_sprites = pygame.sprite.Group()
+        self.attackable_sprites = pygame.sprite.Group()
+
+        # Sprite setup
+        self.create_world()
 
         # User Interface
         self.ui = Ui()
@@ -57,7 +59,7 @@ class Level:
                             random_grass_image = choice(graphics['grass'])
                             Tile(
                                 pos=(x,y),
-                                groups=[self.visible_sprites, self.obstacle_sprites],
+                                groups=[self.visible_sprites, self.obstacle_sprites, self.attackable_sprites],
                                 sprite_type='grass',
                                 surface=random_grass_image
                             )
@@ -88,25 +90,52 @@ class Level:
                                 self.enemy = Enemy(
                                     monster_name=monster_name,
                                     position=(x, y),
-                                    groups=[self.visible_sprites],
-                                    obstacle_sprites=self.obstacle_sprites
+                                    groups=[self.visible_sprites, self.attackable_sprites],
+                                    obstacle_sprites=self.obstacle_sprites,
+                                    damage_player=self.damage_player
                                 )
 
     def create_attack(self):
-        self.current_attack = Weapon(self.player, [self.visible_sprites])
+        self.current_attack = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
 
     def destroy_attack(self):
         if self.current_attack:
             self.current_attack.kill()
         self.current_attack = None
 
+    def player_attack_logic(self):
+        if self.attack_sprites:
+            for attack_sprite in self.attack_sprites:
+                collision_sprites = pygame.sprite.spritecollide(
+                    sprite=attack_sprite,
+                    group=self.attackable_sprites,
+                    dokill=False
+                )
+
+                if collision_sprites:
+                    for target_sprite in collision_sprites:
+                        if target_sprite.sprite_type == 'grass':
+                            target_sprite.kill()
+                        else:
+                            target_sprite.get_damage(self.player, attack_sprite.sprite_type)
+
     def create_magic(self, style, strength, cost):
         pass
 
+    def damage_player(self, amount, attack_type):
+        if self.player.vulnerable:
+            self.player.health -= amount
+            self.player.vulnerable = False
+            self.player.hurt_time = pygame.time.get_ticks()
+
+            # spawn particles
+
     def run(self) -> None:
+        """Update and draw the game"""
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
+        self.player_attack_logic()
         self.ui.display(self.player)
 
 

@@ -8,7 +8,7 @@ from src.entity import Entity
 
 
 class Enemy(Entity):
-    def __init__(self, monster_name, position, groups: AbstractGroup, obstacle_sprites) -> None:
+    def __init__(self, monster_name, position, groups: AbstractGroup, obstacle_sprites, damage_player) -> None:
 
         # General setup
         super().__init__(groups)
@@ -40,7 +40,12 @@ class Enemy(Entity):
         self.can_attack = True
         self.attack_time = None
         self.attack_cooldown = 400
+        self.damage_player = damage_player
 
+        # Invincibility timer
+        self.vulnerable = True
+        self.hit_time = None
+        self.invincibility_duration = 300
 
     def import_graphics(self, monster_name: str) -> None:
         self.animations = {
@@ -68,7 +73,7 @@ class Enemy(Entity):
 
         return (distance, direction)
 
-    def get_status(self, player):
+    def get_status(self, player) -> None:
         distance_of_player = self.get_player_distance_direction(player)[0]
 
         if distance_of_player <= self.attack_radius and self.can_attack:
@@ -80,15 +85,18 @@ class Enemy(Entity):
         else:
             self.status = 'idle'
     
-    def actions(self, player):
+    def actions(self, player) -> None:
         if self.status == 'attack':
             self.attack_time = pygame.time.get_ticks()
+            self.damage_player(
+                self.attack_damage, self.attack_type
+            )
         elif self.status == 'move':
             self.direction = self.get_player_distance_direction(player)[1]
         else:
             self.direction = pygame.math.Vector2()
 
-    def animate(self):
+    def animate(self) -> None:
         animation = self.animations[self.status]
         self.frame_index += self.animation_speed
         if self.frame_index >= len(animation):
@@ -99,17 +107,50 @@ class Enemy(Entity):
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center = self.hitbox.center)
 
-    def cooldown(self):
+        if not self.vulnerable:
+            alpha = self.wave_value()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)
+
+    def cooldowns(self) -> None:
+        current_time = pygame.time.get_ticks()
+
         if not self.can_attack:
-            current_time = pygame.time.get_ticks()
             if current_time - self.attack_time >= self.attack_cooldown:
                 self.can_attack = True
+        
+        if not self.vulnerable:
+            if current_time - self.hit_time >= self.invincibility_duration:
+                self.vulnerable = True
 
-    def update(self):
+    def get_damage(self, player, attack_type) -> None:
+        if self.vulnerable:
+            self.direction = self.get_player_distance_direction(player)[1]
+
+            if attack_type == 'weapon':
+                self.health -= player.get_full_weapon_damage()
+            else:
+                pass
+                # magic damage
+            self.hit_time = pygame.time.get_ticks()
+            self.vulnerable = False
+    
+    def check_death(self) -> None:
+        if self.health <= 0:
+            self.kill()
+
+    def hit_reaction(self) -> None:
+        if not self.vulnerable:
+            self.direction *= -self.resistance
+
+    def update(self) -> None:
+        self.hit_reaction()
         self.move(self.speed)
         self.animate()
-        self.cooldown()
+        self.cooldowns()
+        self.check_death()
     
-    def enemy_update(self, player):
+    def enemy_update(self, player) -> None:
         self.get_status(player)
         self.actions(player)

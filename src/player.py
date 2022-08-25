@@ -1,3 +1,4 @@
+from typing import Union
 import pygame
 
 from src.settings import *
@@ -60,7 +61,12 @@ class Player(Entity):
         self.speed = self.stats['speed']
         self.exp = 123
 
-    def import_player_assets(self):
+        # Damage timer
+        self.vulnerable = True
+        self.hurt_time = None
+        self.invulnerability_duration = 500
+
+    def import_player_assets(self) -> None:
         player_path = './graphics/player/'
         self.animations = {
             'up': [],
@@ -81,7 +87,7 @@ class Player(Entity):
             full_path = player_path + animation
             self.animations[animation] = import_folder_imgs(full_path)
     
-    def key_input(self):
+    def key_input(self) -> None:
         """Map the keyboard key to generate an action on player"""
 
         if not self.attaking:
@@ -144,7 +150,7 @@ class Player(Entity):
                     self.magic_index = 0
                 self.magic = list(MAGIC_DATA.keys())[self.magic_index]
 
-    def get_status(self):
+    def get_status(self) -> None:
         # idle status
         if self.direction.x == 0 and self.direction.y == 0:
             if not 'idle' in self.status and not 'attack' in self.status:
@@ -167,7 +173,7 @@ class Player(Entity):
         """Check the time of attack and magic actions to cooldown the actions"""
         current_time = pygame.time.get_ticks()
         if self.attaking:
-            if current_time - self.attack_time >= self.attack_cooldown:
+            if current_time - self.attack_time >= self.attack_cooldown + WEAPON_DATA[self.weapon]['cooldown']:
                 self.attaking = False
                 self.destroy_attack()
         
@@ -178,8 +184,12 @@ class Player(Entity):
         if not self.can_switch_magic:
             if current_time - self.magic_switch_time >= self.switch_duration_cooldown:
                 self.can_switch_magic = True
+        
+        if not self.vulnerable:
+            if current_time - self.hurt_time >= self.invulnerability_duration:
+                self.vulnerable = True
 
-    def animate(self):
+    def animate(self) -> None:
         animation = self.animations[self.status]
 
         # Loop over the frame index
@@ -191,6 +201,20 @@ class Player(Entity):
         # Set the image
         self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center = self.hitbox.center)
+
+        # Flicker
+        if not self.vulnerable:
+            alpha = self.wave_value()
+            self.image.set_alpha(alpha)
+        else:
+            self.image.set_alpha(255)
+        
+
+    def get_full_weapon_damage(self) -> Union[float, int]:
+        base_damage = self.stats['attack']
+        weapon_damage =  WEAPON_DATA[self.weapon]['damage']
+
+        return base_damage + weapon_damage
 
     def update(self) -> None:
         self.key_input()

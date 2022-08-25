@@ -1,3 +1,5 @@
+from math import sin
+
 import pygame
 from pygame.sprite import AbstractGroup
 
@@ -39,3 +41,11 @@ class Entity(pygame.sprite.Sprite):
                         self.hitbox.bottom = sprite.hitbox.top
                     if self.direction.y < 0: # moving up
                         self.hitbox.top = sprite.hitbox.bottom
+
+    def wave_value(self):
+        value = sin(pygame.time.get_ticks())
+
+        if value >= 0:
+            return 255
+        else:
+            return 0
