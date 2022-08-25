@@ -1,3 +1,4 @@
+from sre_constants import MAGIC
 from typing import Union
 import pygame
 
@@ -215,9 +216,22 @@ class Player(Entity):
 
         return base_damage + weapon_damage
 
+    def get_full_magic_damage(self) -> Union[float, int]:
+        base_damage = self.stats['magic']
+        spell_damage =  MAGIC_DATA[self.magic]['strength']
+
+        return base_damage + spell_damage
+
+    def energy_recovery(self):
+        if self.energy < self.stats['energy']:
+            self.energy += .01 * self.stats['magic']
+        else:
+            self.energy = self.stats['energy']
+
     def update(self) -> None:
         self.key_input()
         self.cooldowns()
         self.get_status()
         self.animate()
         self.move(self.speed)
+        self.energy_recovery()

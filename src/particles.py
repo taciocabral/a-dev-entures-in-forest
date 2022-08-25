@@ -71,6 +71,7 @@ class PartcileEffect(pygame.sprite.Sprite):
     def __init__(self, position, animation_frames, *groups: AbstractGroup) -> None:
         super().__init__(*groups)
 
+        self.sprite_type = 'magic'
         self.frame_index = 0
         self.animation_speed = .15
         self.frames = animation_frames

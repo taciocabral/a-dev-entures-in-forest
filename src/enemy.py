@@ -1,10 +1,12 @@
 from typing import Tuple
+
 import pygame
 from pygame.sprite import AbstractGroup
 
 from src.settings import *
 from src.support import *
 from src.entity import Entity
+from src.player.player import Player
 
 
 class Enemy(Entity):
@@ -125,14 +127,14 @@ class Enemy(Entity):
             if current_time - self.hit_time >= self.invincibility_duration:
                 self.vulnerable = True
 
-    def get_damage(self, player, attack_type) -> None:
+    def get_damage(self, player: Player, attack_type) -> None:
         if self.vulnerable:
             self.direction = self.get_player_distance_direction(player)[1]
 
             if attack_type == 'weapon':
                 self.health -= player.get_full_weapon_damage()
             else:
-                pass
+                self.health -= player.get_full_magic_damage()
                 # magic damage
             self.hit_time = pygame.time.get_ticks()
             self.vulnerable = False

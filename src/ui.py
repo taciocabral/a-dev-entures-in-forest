@@ -1,7 +1,7 @@
 import pygame
 
 from src.settings import *
-from src.player import Player
+from src.player.player import Player
 
 class Ui:
     def __init__(self) -> None:

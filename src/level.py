@@ -2,14 +2,15 @@ from random import choice, randint
 
 import pygame
 
+from src.enemy import Enemy 
 from src.particles import AnimationPlayer
+from src.player.player import Player
+from src.player.magic import MagicPlayer
 from src.settings import *
-from src.tile import Tile
-from src.player import Player
 from src.support import import_csv_layout, import_folder_imgs
+from src.tile import Tile
 from src.ui import Ui
 from src.weapon import Weapon
-from src.enemy import Enemy 
 
 
 class Level:
@@ -34,6 +35,7 @@ class Level:
 
         # Particles
         self.animation_player = AnimationPlayer()
+        self.magic_player = MagicPlayer(self.animation_player)
 
     def create_world(self) -> None:
         layouts = {
@@ -133,7 +135,20 @@ class Level:
                             target_sprite.get_damage(self.player, attack_sprite.sprite_type)
 
     def create_magic(self, style, strength, cost):
-        pass
+        if style == 'heal':
+            self.magic_player.heal(
+                player=self.player,
+                strength=strength,
+                magic_cost=cost,
+                groups=[self.visible_sprites]
+            )
+
+        if style == 'flame':
+            self.magic_player.flame(
+                player=self.player,
+                cost=cost,
+                groups=[self.visible_sprites, self.attack_sprites]
+            )
 
     def damage_player(self, amount, attack_type):
         if self.player.vulnerable:
