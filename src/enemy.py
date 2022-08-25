@@ -8,7 +8,7 @@ from src.entity import Entity
 
 
 class Enemy(Entity):
-    def __init__(self, monster_name, position, groups: AbstractGroup, obstacle_sprites, damage_player) -> None:
+    def __init__(self, monster_name, position, groups: AbstractGroup, obstacle_sprites, damage_player, trigger_death_particles) -> None:
 
         # General setup
         super().__init__(groups)
@@ -41,6 +41,7 @@ class Enemy(Entity):
         self.attack_time = None
         self.attack_cooldown = 400
         self.damage_player = damage_player
+        self.trigger_death_particles = trigger_death_particles
 
         # Invincibility timer
         self.vulnerable = True
@@ -139,6 +140,10 @@ class Enemy(Entity):
     def check_death(self) -> None:
         if self.health <= 0:
             self.kill()
+            self.trigger_death_particles(
+                self.rect.center,
+                self.monster_name
+            )
 
     def hit_reaction(self) -> None:
         if not self.vulnerable:

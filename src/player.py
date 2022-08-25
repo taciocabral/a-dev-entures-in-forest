@@ -208,7 +208,6 @@ class Player(Entity):
             self.image.set_alpha(alpha)
         else:
             self.image.set_alpha(255)
-        
 
     def get_full_weapon_damage(self) -> Union[float, int]:
         base_damage = self.stats['attack']
