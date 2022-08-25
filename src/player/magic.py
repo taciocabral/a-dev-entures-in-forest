@@ -8,9 +8,17 @@ from src.player.player import Player
 class MagicPlayer:
     def __init__(self, animation_player) -> None:
         self.animation_player = animation_player
+        self.sounds = {
+            'heal': pygame.mixer.Sound('./audio/heal.wav'),
+            'flame': pygame.mixer.Sound('./audio/fire.wav')
+        }
 
     def heal(self, player: Player, strength, magic_cost, groups):
         if player.energy >= magic_cost:
+            sound = self.sounds['heal']
+            sound.set_volume(.05)
+            sound.play()
+
             player.health += strength
             player.energy -= magic_cost
 
@@ -30,6 +38,10 @@ class MagicPlayer:
 
     def flame(self, player: Player, cost, groups):
         if player.energy >= cost:
+            sound = self.sounds['flame']
+            sound.set_volume(.05)
+            sound.play()
+
             player.energy -= cost
         
             if player.status.split('_')[0] == 'right':
